@@ -1,11 +1,7 @@
 ﻿using System.Linq.Expressions;
 
 Console.WriteLine("----START----");
-
 List<Card> FullDeck = new List<Card>();
-int FullMoney = 1000;
-int currentMoney = FullMoney;
-int currentBet;
 
 for (int i = 1; i < 14; i++)
 {
@@ -25,7 +21,7 @@ for (int i = 1; i < 14; i++)
             c = "J";
             break;
         default:// i = [2, 10]
-            c = (i+"");
+            c = (i + "");
             break;
     }
 
@@ -42,24 +38,22 @@ WriteWholeDecks(FullDeck);
 
 //---------------------------------------------------------------------------------
 
-double GameCount = 0;
-double GameWon = 0;
-double GameLost = 0;
-double GameDraw = 0;
+int GameCount = 0;
+int GameWon = 0;
+int GameLost = 0;
+int GameDraw = 0;
 
 Console.WriteLine("----Game Start----");
-Console.WriteLine("Starting cash: " + FullMoney);
-while (currentMoney > 0)
+while (GameCount < 9999999)//100.000.000
 {
     GameCount++;
-    currentBet = 100;
 
     List<Card> House = new List<Card>();
     House.Add(RandomCardGiver());
     House.Add(RandomCardGiver());
 
-    Console.WriteLine("Starting House:");
-    WriteWholeDecks(House);
+    //Console.WriteLine("Starting House:");
+    //WriteWholeDecks(House);
 
     while (!(GiveCurrentPoint(House) >= 17 && GiveCurrentPoint(House) <= 21))
     {
@@ -77,9 +71,10 @@ while (currentMoney > 0)
     Player.Add(RandomCardGiver());
     Player.Add(RandomCardGiver());
 
-    Console.WriteLine("Starting Player:");
-    WriteWholeDecks(Player);
+    //Console.WriteLine("Starting Player:");
+    //WriteWholeDecks(Player);
 
+    #region Player:
     while (true)
     {
         if (GiveCurrentPoint(Player) <= 11)
@@ -146,16 +141,18 @@ while (currentMoney > 0)
             break;
         }
     }
+    #endregion
 
-    Console.WriteLine("End Player:");
-    WriteWholeDecks(Player);
+    //Console.WriteLine("End Player:");
+    //WriteWholeDecks(Player);
 
     int playerPoint = GiveCurrentPoint(Player);
     int housePoint = GiveCurrentPoint(House);
 
-    Console.WriteLine("End House:");
-    WriteWholeDecks(House);
+    //Console.WriteLine("End House:");
+    //WriteWholeDecks(House);
 
+    #region House:
     if (housePoint < 21)
     {
         if(playerPoint < 21)
@@ -163,12 +160,10 @@ while (currentMoney > 0)
             if(housePoint > playerPoint)
             {
                 GameLost++;
-                currentMoney -= currentBet;
             }
             else if(housePoint < playerPoint)
             {
                 GameWon++;
-                currentMoney += currentBet;
             }
             else
             {
@@ -178,7 +173,6 @@ while (currentMoney > 0)
         else
         {
             GameLost++;
-            currentMoney -= currentBet;
         }
     }
     else
@@ -186,23 +180,24 @@ while (currentMoney > 0)
         if (playerPoint < 21)
         {
             GameWon++;
-            currentMoney += currentBet;
         }
         else
         {
             GameLost++;
-            currentMoney -= currentBet;
         }
     }
+    #endregion
 
-    Console.WriteLine("Current Money: " + currentMoney);
-    Console.WriteLine("--------------------------");
+    //Console.WriteLine("--------------------------");
 }
+
+//---------------------------------------------------------------------------------
+
+Console.WriteLine("-----Game End-----" + "\n");
 Console.WriteLine("Game count: " + GameCount);
-Console.WriteLine("Game won count: " + GameWon + " - " + ((GameWon / GameCount) * 100) + "%");
-Console.WriteLine("Game lost count: " + GameLost + " - " + ((GameLost / GameCount) * 100) + "%");
-Console.WriteLine("Game draw count: " + GameDraw + " - " + ((GameDraw / GameCount) * 100) + "%");
-Console.WriteLine("End money: " + currentMoney);
+Console.WriteLine("Game won count: " + GameWon + " - " + (((float)GameWon / GameCount) * 100) + "%");
+Console.WriteLine("Game lost count: " + GameLost + " - " + (((float)GameLost / GameCount) * 100) + "%");
+Console.WriteLine("Game draw count: " + GameDraw + " - " + (((float)GameDraw / GameCount) * 100) + "%"); 
 
 //---------------------------------------------------------------------------------
 
@@ -254,10 +249,21 @@ int CardToPoint(Card card)
 int GiveCurrentPoint(List<Card> cards)
 {
     int current = 0;
+    int numberOfA = 0;
+
     foreach (Card card in cards)
     {
         current += CardToPoint(card);
+        if (card.Name == "A")
+            numberOfA++;
     }
+
+    while (current > 21 && numberOfA > 0)
+    {
+        current -= 10;
+        numberOfA--;
+    }
+
     return current;
 }
 
@@ -268,7 +274,9 @@ Card RandomCardGiver()
 
     return FullDeck[rn];
 }
+
 //---------------------------------------------------------------------------------
+
 public class Card
 {
     //A, 2, 3, 4, 5, 6, 7, 8, 9, 10, Q, K, J
